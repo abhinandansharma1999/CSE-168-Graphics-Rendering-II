@@ -69,6 +69,39 @@
       padding: 3rem 2rem 5rem;
     }
 
+    /* ── TABS ── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .tab-btn {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
     /* ── HERO TEXT ── */
     .hero {
       padding-bottom: 2.5rem;
@@ -294,169 +327,332 @@
 <header>
   <a class="logo" href="#">Abhinandan<span>.</span>dev</a>
   <nav>
-    <a href="#features">Features</a>
-    <a href="#gallery">Gallery</a>
     <a href="/cdn-cgi/l/email-protection#cfaeadbcfffdfe8fbaacbcabe1aaabba">Contact</a>
   </nav>
 </header>
 
 <main>
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="tag">CSE 168 · UCSD · 2026</div>
-    <h1>Assignment 1<br>Ray Tracing with OptiX</h1>
-    <p>
-      A GPU-accelerated ray tracer built on NVIDIA OptiX. Implements
-      Blinn-Phong shading, recursive mirror reflections, ellipsoidal
-      geometry via object-space transforms, and physically-based
-      light attenuation.
-    </p>
-    <div class="meta-row">
-      <div class="meta-item">
-        <span class="meta-label">Student</span>
-        <span class="meta-value">Abhinandan Sharma</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">GPU</span>
-        <span class="meta-value">NVIDIA GTX 1650</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Stack</span>
-        <span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span>
-      </div>
-    </div>
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn" onclick="switchTab('a1')" id="btn-a1">Assignment 1</button>
+    <button class="tab-btn active" onclick="switchTab('a2')" id="btn-a2">Assignment 2</button>
   </div>
 
-  <!-- FEATURES -->
-  <div id="features">
+  <!-- ══════════════════════════════════════════
+       ASSIGNMENT 1
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-a1">
+
+    <div class="hero">
+      <div class="tag">CSE 168 · UCSD · 2026</div>
+      <h1>Assignment 1<br>Ray Tracing with OptiX</h1>
+      <p>
+        A GPU-accelerated ray tracer built on NVIDIA OptiX. Implements
+        Blinn-Phong shading, recursive mirror reflections, ellipsoidal
+        geometry via object-space transforms, and physically-based
+        light attenuation.
+      </p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Student</span>
+          <span class="meta-value">Abhinandan Sharma</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">GPU</span>
+          <span class="meta-value">NVIDIA GTX 1650</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Stack</span>
+          <span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="features">
+      <div class="section-title">Implementation Highlights</div>
+      <div class="features">
+        <div class="feat">
+          <div class="feat-title">Three-Level BVH Acceleration</div>
+          <div class="feat-desc">Triangles and spheres each have their own <code>GeometryGroup</code> BVH, both merged under a root <code>Group</code> BVH — three BVHs total. Handles tens of thousands of triangles in the dragon scene efficiently.</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">Ellipsoid Intersection</div>
+          <div class="feat-desc">Each sphere stores its inverse model matrix. Ray is transformed to object space (<code>w=1</code> for points, <code>w=0</code> for directions), solved against a unit sphere, normal brought back via <code>(A⁻¹)ᵀ</code>.</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">Blinn-Phong Shading</div>
+          <div class="feat-desc">Full <code>ka + kd + ks + ke</code> material model. Diffuse via Lambert dot-product. Specular via half-vector <code>H = normalize(L+V)</code>. Shadow rays gate both terms per light.</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">Light Attenuation</div>
+          <div class="feat-desc">Point lights attenuate with <code>1/(c₁ + c₂d + c₃d²)</code>, parsed from the <code>attenuation</code> scene command. Directional lights are unattenuated.</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">Recursive Reflections</div>
+          <div class="feat-desc">Surfaces with non-zero <code>ks</code> spawn mirror rays via <code>r = d − 2(d·n)n</code>. Depth tracked in payload struct, capped at 5 bounces to prevent infinite recursion.</div>
+        </div>
+        <div class="feat">
+          <div class="feat-title">Shadow Rays</div>
+          <div class="feat-desc">One shadow ray per light per hit point. Point-light rays use <code>tmax = dist − ε</code> to avoid over-shadowing. Epsilon offset on origin prevents self-intersection.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-block">
+        <h3>Scene Commands Supported</h3>
+        <ul>
+          <li>size, output, camera</li>
+          <li>ambient, diffuse, specular, emission, shininess</li>
+          <li>point, directional, attenuation, maxdepth</li>
+          <li>maxverts, vertex, tri, sphere</li>
+          <li>pushTransform, popTransform</li>
+          <li>translate, rotate, scale</li>
+        </ul>
+      </div>
+      <div class="tech-block">
+        <h3>Implementation Notes</h3>
+        <p>
+          Normals use the inverse-transpose (n′ = (A⁻¹)ᵀ n) to stay
+          perpendicular under non-uniform scale. Sphere bounding boxes
+          are computed by transforming all 8 object-space AABB corners
+          to world space and taking min/max — giving tight, correct
+          bounds for the BVH. OptiX trace depth is 12; shader caps
+          reflections at 5 bounces.
+        </p>
+      </div>
+    </div>
+
+    <div id="gallery">
+      <div class="section-title">Rendered Images</div>
+      <div class="gallery">
+
+        <div class="img-card">
+          <img src="images/scene4-ambient.png" alt="Scene 4 Ambient"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 04A</span>
+            <span class="img-title">Ambient Only</span>
+            <span class="img-desc">Table scene with ambient-only materials. Flat colour pass showing the transform stack, pinwheel ellipsoids, and table geometry with no lighting computation.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene4-diffuse.png" alt="Scene 4 Diffuse"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 04B</span>
+            <span class="img-title">Diffuse Lighting</span>
+            <span class="img-desc">Same table scene with Lambertian diffuse shading. Light falloff across surfaces confirms correct normals on both the flat triangles and the transformed ellipsoids.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene4-emission.png" alt="Scene 4 Emission"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 04C</span>
+            <span class="img-title">Emission Lighting</span>
+            <span class="img-desc">Table scene with emissive objects, where selected geometry glows from its own light output instead of reflecting surrounding surfaces.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene4-specular.png" alt="Scene 4 Specular"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 04D</span>
+            <span class="img-title">Specular Highlights</span>
+            <span class="img-desc">Table scene demonstrating specular shading, where shiny surfaces produce bright highlights and glossy-looking curved reflections.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene5.png" alt="Scene 5 Sphere Grid"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 05</span>
+            <span class="img-title">Infinite Sphere Grid</span>
+            <span class="img-desc">A vast grid of dark reflective spheres receding to the horizon. Tests the BVH with a large primitive count and shows inter-sphere recursive reflections.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene6.png" alt="Scene 6 Cornell Box"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 06</span>
+            <span class="img-title">Cornell Box</span>
+            <span class="img-desc">Classic Cornell box with red and green walls. Point light with quadratic attenuation, directional fill, mixed triangle and sphere geometry, and an egg-shaped ellipsoid.</span>
+          </div>
+        </div>
+
+        <div class="img-card">
+          <img src="images/scene7.png" alt="Scene 7 Dragon"/>
+          <div class="img-info">
+            <span class="img-tag">Scene 07</span>
+            <span class="img-title">Dragon Mesh</span>
+            <span class="img-desc">High-polygon triangle mesh of a dragon rendered with diffuse shading and a directional light. Demonstrates the two-level BVH handling tens of thousands of triangles.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /panel-a1 -->
+
+
+  <!-- ══════════════════════════════════════════
+       ASSIGNMENT 2
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-a2">
+
+    <div class="hero">
+      <div class="tag">CSE 168 · UCSD · 2026</div>
+      <h1>Assignment 2<br>Direct Lighting</h1>
+      <p>
+        Extends the ray tracer with physically-based direct illumination from
+        parallelogram (quad) area lights, point lights, and directional lights.
+        Implements a Monte Carlo estimator with both uniform and stratified sampling
+        using the Modified Phong BRDF, plus shadow ray occlusion testing per sample.
+      </p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <span class="meta-label">Student</span>
+          <span class="meta-value">Abhinandan Sharma</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">GPU</span>
+          <span class="meta-value">NVIDIA GTX 1650</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Stack</span>
+          <span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span>
+        </div>
+      </div>
+    </div>
+
     <div class="section-title">Implementation Highlights</div>
     <div class="features">
       <div class="feat">
-        <div class="feat-title">Three-Level BVH Acceleration</div>
-        <div class="feat-desc">Triangles and spheres each have their own <code>GeometryGroup</code> BVH, both merged under a root <code>Group</code> BVH — three BVHs total. Handles tens of thousands of triangles in the dragon scene efficiently.</div>
+        <div class="feat-title">Area Light Sampling</div>
+        <div class="feat-desc">Random points are sampled across the surface of each parallelogram light. The light is one-sided — surfaces on the back face of the quad receive no illumination from it. Contributions are averaged and scaled by the light's area to estimate total incident light at the hit point.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Ellipsoid Intersection</div>
-        <div class="feat-desc">Each sphere stores its inverse model matrix. Ray is transformed to object space (<code>w=1</code> for points, <code>w=0</code> for directions), solved against a unit sphere, normal brought back via <code>(A⁻¹)ᵀ</code>.</div>
+        <div class="feat-title">Stratified Sampling</div>
+        <div class="feat-desc">The light surface is divided into an equal grid and one sample is taken per cell with a random jitter. This spreads samples more evenly than pure random sampling, reducing noise at the same sample count.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Blinn-Phong Shading</div>
-        <div class="feat-desc">Full <code>ka + kd + ks + ke</code> material model. Diffuse via Lambert dot-product. Specular via half-vector <code>H = normalize(L+V)</code>. Shadow rays gate both terms per light.</div>
+        <div class="feat-title">Shadow Testing Per Sample</div>
+        <div class="feat-desc">A shadow ray is cast toward every light sample. If anything blocks the path, that sample is skipped entirely. This correctly produces soft shadows at the edges of area lights.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Light Attenuation</div>
-        <div class="feat-desc">Point lights attenuate with <code>1/(c₁ + c₂d + c₃d²)</code>, parsed from the <code>attenuation</code> scene command. Directional lights are unattenuated.</div>
+        <div class="feat-title">Modified Phong BRDF</div>
+        <div class="feat-desc">Each surface uses an energy-conserving reflectance model combining a diffuse layer and a specular highlight. The specular lobe is normalized so brighter highlights don't violate conservation of energy.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Recursive Reflections</div>
-        <div class="feat-desc">Surfaces with non-zero <code>ks</code> spawn mirror rays via <code>r = d − 2(d·n)n</code>. Depth tracked in payload struct, capped at 5 bounces to prevent infinite recursion.</div>
+        <div class="feat-title">Multiple Light Types</div>
+        <div class="feat-desc">Supports parallelogram area lights, point lights with quadratic distance falloff, and infinite directional lights. All three types cast shadow rays and contribute diffuse and specular shading.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Shadow Rays</div>
-        <div class="feat-desc">One shadow ray per light per hit point. Point-light rays use <code>tmax = dist − ε</code> to avoid over-shadowing. Epsilon offset on origin prevents self-intersection.</div>
+        <div class="feat-title">Two-Sided Surface Shading</div>
+        <div class="feat-desc">Surface normals are flipped when a ray hits the back face of geometry, ensuring correct shading and shadow ray offsets regardless of triangle winding order in the scene file.</div>
       </div>
     </div>
-  </div>
 
-  <!-- TECH DETAILS -->
-  <div class="tech-grid">
-    <div class="tech-block">
-      <h3>Scene Commands Supported</h3>
-      <ul>
-        <li>size, output, camera</li>
-        <li>ambient, diffuse, specular, emission, shininess</li>
-        <li>point, directional, attenuation, maxdepth</li>
-        <li>maxverts, vertex, tri, sphere</li>
-        <li>pushTransform, popTransform</li>
-        <li>translate, rotate, scale</li>
-      </ul>
+    <div class="tech-grid">
+      <div class="tech-block">
+        <h3>New Scene Commands</h3>
+        <ul>
+          <li>integrator &lt;name&gt;</li>
+          <li>quadLight a ab ac rgb</li>
+          <li>lightsamples &lt;N&gt;</li>
+          <li>lightstratify on|off</li>
+          <li>point, directional, attenuation</li>
+        </ul>
+      </div>
+      <div class="tech-block">
+        <h3>Implementation Notes</h3>
+        <p>
+          Shadow rays stop just short of the light surface to avoid false
+          self-occlusion. Uniform and stratified sampling use independent
+          random seeds per pixel and per light to prevent correlated noise
+          patterns across the image. Final radiance is clamped to the
+          displayable range per channel.
+        </p>
+      </div>
     </div>
-    <div class="tech-block">
-      <h3>Implementation Notes</h3>
-      <p>
-        Normals use the inverse-transpose (n′ = (A⁻¹)ᵀ n) to stay
-        perpendicular under non-uniform scale. Sphere bounding boxes
-        are computed by transforming all 8 object-space AABB corners
-        to world space and taking min/max — giving tight, correct
-        bounds for the BVH. OptiX trace depth is 12; shader caps
-        reflections at 5 bounces.
-      </p>
-    </div>
-  </div>
 
-  <!-- GALLERY -->
-  <div id="gallery">
     <div class="section-title">Rendered Images</div>
     <div class="gallery">
 
       <div class="img-card">
-        <img src="images/scene4-ambient.png" alt="Scene 4 Ambient"/>
+        <img src="images/analytic.png" alt="Analytic Direct Lighting"/>
         <div class="img-info">
-          <span class="img-tag">Scene 04A</span>
-          <span class="img-title">Ambient Only</span>
-          <span class="img-desc">Table scene with ambient-only materials. Flat colour pass showing the transform stack, pinwheel ellipsoids, and table geometry with no lighting computation.</span>
+          <span class="img-tag">Analytic</span>
+          <span class="img-title">Analytic Direct Lighting</span>
+          <span class="img-desc">Noise-free floor illumination from a parallelogram light above, computed analytically using the Arvo irradiance vector formula. No shadow rays needed — exact result in a single pass.</span>
         </div>
       </div>
 
       <div class="img-card">
-        <img src="images/scene4-diffuse.png" alt="Scene 4 Diffuse"/>
+        <img src="images/direct3x3.png" alt="Monte Carlo 3x3 Stratified"/>
         <div class="img-info">
-          <span class="img-tag">Scene 04B</span>
-          <span class="img-title">Diffuse Lighting</span>
-          <span class="img-desc">Same table scene with Lambertian diffuse shading. Light falloff across surfaces confirms correct normals on both the flat triangles and the transformed ellipsoids.</span>
+          <span class="img-tag">Direct · 3×3 Stratified</span>
+          <span class="img-title">Monte Carlo — 3×3 Stratified Sampling</span>
+          <span class="img-desc">9 stratified samples per light source. Soft shadow edges and area light falloff are clearly visible with significantly reduced noise compared to 9 uniform samples.</span>
         </div>
       </div>
 
       <div class="img-card">
-        <img src="images/scene4-emission.png" alt="Scene 4 Emission"/>
+        <img src="images/direct9.png" alt="Monte Carlo 9 Uniform"/>
         <div class="img-info">
-          <span class="img-tag">Scene 04C</span>
-          <span class="img-title">Emission Lighting</span>
-          <span class="img-desc">Table scene with emissive objects, where selected geometry glows from its own light output instead of reflecting surrounding surfaces.</span>
+          <span class="img-tag">Direct · N=9 Uniform</span>
+          <span class="img-title">Monte Carlo — 9 Uniform Samples</span>
+          <span class="img-desc">9 uniform random samples per light. Soft shadows are present but visible noise remains, demonstrating the variance reduction benefit of stratified sampling at the same sample count.</span>
         </div>
       </div>
 
       <div class="img-card">
-        <img src="images/scene4-specular.png" alt="Scene 4 Specular"/>
+        <img src="images/sphere.png" alt="Sphere Scene"/>
         <div class="img-info">
-          <span class="img-tag">Scene 04D</span>
-          <span class="img-title">Specular Highlights</span>
-          <span class="img-desc">Table scene demonstrating specular shading, where shiny surfaces produce bright highlights and glossy-looking curved reflections.</span>
+          <span class="img-tag">Sphere · 5×5 Stratified</span>
+          <span class="img-title">Overlapping Soft Shadows</span>
+          <span class="img-desc">Two colored area lights (red and blue) with a diffuse gray sphere. Overlapping soft shadow regions demonstrate the correctness of per-light Monte Carlo sampling with stratification.</span>
         </div>
       </div>
 
       <div class="img-card">
-        <img src="images/scene5.png" alt="Scene 5 Sphere Grid"/>
+        <img src="images/cornell.png" alt="Cornell Box"/>
         <div class="img-info">
-          <span class="img-tag">Scene 05</span>
-          <span class="img-title">Infinite Sphere Grid</span>
-          <span class="img-desc">A vast grid of dark reflective spheres receding to the horizon. Tests the BVH with a large primitive count and shows inter-sphere recursive reflections.</span>
+          <span class="img-tag">Cornell · 5×5 Stratified</span>
+          <span class="img-title">Cornell Box — Area Light</span>
+          <span class="img-desc">Classic Cornell box illuminated by a single parallelogram area light. Soft shadows on the floor and walls, specular highlight on the sphere, colored wall bleeding — all from direct lighting only.</span>
         </div>
       </div>
 
       <div class="img-card">
-        <img src="images/scene6.png" alt="Scene 6 Cornell Box"/>
+        <img src="images/dragon.png" alt="Dragon Scene"/>
         <div class="img-info">
-          <span class="img-tag">Scene 06</span>
-          <span class="img-title">Cornell Box</span>
-          <span class="img-desc">Classic Cornell box with red and green walls. Point light with quadratic attenuation, directional fill, mixed triangle and sphere geometry, and an egg-shaped ellipsoid.</span>
-        </div>
-      </div>
-
-      <div class="img-card">
-        <img src="images/scene7.png" alt="Scene 7 Dragon"/>
-        <div class="img-info">
-          <span class="img-tag">Scene 07</span>
-          <span class="img-title">Dragon Mesh</span>
-          <span class="img-desc">High-polygon triangle mesh of a dragon rendered with diffuse shading and a directional light. Demonstrates the two-level BVH handling tens of thousands of triangles.</span>
+          <span class="img-tag">Dragon · 5×5 Stratified</span>
+          <span class="img-title">Stanford Dragon — Area Lights</span>
+          <span class="img-desc">High-polygon Stanford dragon mesh lit by two parallelogram area lights. Modified Phong BRDF produces specular highlights across the curved surface. 25 stratified samples per light.</span>
         </div>
       </div>
 
     </div>
-  </div>
+
+  </div><!-- /panel-a2 -->
 
 </main>
 
 <footer>
-  Abhinandan Sharma · <a href="/cdn-cgi/l/email-protection#0e6f6c7d3e3c3f4e7b6d7d6a206b6a7b"><span c
+  Abhinandan Sharma · <a href="mailto:abhinandan@ucsd.edu">abhinandan@ucsd.edu</a> · CSE 168 UCSD 2026
+</footer>
+
+<script>
+  function switchTab(id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    document.getElementById('btn-' + id).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
