@@ -337,6 +337,7 @@
   <div class="tab-bar">
     <button class="tab-btn" onclick="switchTab('a1')" id="btn-a1">Assignment 1</button>
     <button class="tab-btn active" onclick="switchTab('a2')" id="btn-a2">Assignment 2</button>
+    <button class="tab-btn" onclick="switchTab('a3')" id="btn-a3">Assignment 3</button>
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -638,6 +639,119 @@
     </div>
 
   </div><!-- /panel-a2 -->
+
+
+  <!-- ASSIGNMENT 3 -->
+  <div class="tab-panel" id="panel-a3">
+    <div class="hero">
+      <div class="tag">CSE 168 · UCSD · 2026</div>
+      <h1>Assignment 3<br>Path Tracing</h1>
+      <p>
+        Extends the renderer with a full unidirectional path tracer supporting
+        global illumination via recursive Monte Carlo path integration.
+        Implements Next Event Estimation (NEE) for direct light sampling at each
+        bounce, and Russian Roulette (RR) termination for unbiased variance
+        reduction with infinite path depth.
+      </p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Student</span><span class="meta-value">Abhinandan Sharma</span></div>
+        <div class="meta-item"><span class="meta-label">GPU</span><span class="meta-value">NVIDIA GTX 1650</span></div>
+        <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">Implementation Highlights</div>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-title">Unidirectional Path Tracing</div>
+        <div class="feat-desc">Paths are traced from the camera, bouncing off surfaces using cosine-weighted hemisphere sampling. Radiance accumulates along the path until termination, capturing full global illumination including color bleeding and indirect shadows.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Next Event Estimation (NEE)</div>
+        <div class="feat-desc">At each path vertex a direct lighting sample is drawn explicitly toward a quad light. A shadow ray confirms visibility and the contribution is added immediately — dramatically reducing variance compared to relying on chance hits to the emitter.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Russian Roulette Termination</div>
+        <div class="feat-desc">Instead of a fixed max depth, paths terminate stochastically with probability proportional to 1 − max channel of throughput. Surviving paths are re-weighted by the inverse probability, keeping the estimator unbiased while enabling infinite path depth (D = ∞).</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Progressive Accumulation</div>
+        <div class="feat-desc">Each SPP frame is launched separately and averaged into the result buffer using a running mean, so the image converges progressively rather than requiring all samples in a single kernel launch.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Cosine-Weighted Hemisphere Sampling</div>
+        <div class="feat-desc">Indirect bounce directions are drawn proportional to cos θ, aligning with the Lambertian BRDF. The PDF cancels the cos θ factor in the rendering equation, leaving only the BRDF albedo as the path weight — lower variance than uniform sampling.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Emitter Visibility from Camera</div>
+        <div class="feat-desc">Quad lights have no scene geometry, so the ray generation program checks direct camera-to-light intersections and composites emitter radiance into the result buffer before tracing any surface paths.</div>
+      </div>
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-block">
+        <h3>New Scene Commands</h3>
+        <ul>
+          <li>integrator pathtracer</li>
+          <li>spp &lt;N&gt;</li>
+          <li>maxdepth &lt;D&gt; (or infinity)</li>
+          <li>nexteventestimation on|off</li>
+          <li>russianroulette on|off</li>
+        </ul>
+      </div>
+      <div class="tech-block">
+        <h3>Implementation Notes</h3>
+        <p>
+          With NEE enabled, emitter hits along indirect paths skip their emission
+          contribution to avoid double-counting the direct light already sampled
+          explicitly. Russian Roulette uses the max RGB channel of the current
+          throughput as the survival probability, clamped to avoid division by
+          near-zero weights.
+        </p>
+      </div>
+    </div>
+
+    <div class="section-title">Rendered Images</div>
+    <div class="gallery">
+
+      <div class="img-card">
+        <img src="images/cornellSimple.png" alt="Cornell simple Scene"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · Simple PT</span>
+          <span class="img-title">Basic Path Tracer</span>
+          <span class="img-desc">Cornell box rendered with a naive unidirectional path tracer — no NEE, fixed max depth. Indirect illumination is captured only when paths happen to hit the area light by chance, producing high variance and significant noise.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/cornellNEE.png" alt="Cornell NEE Scene"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · NEE</span>
+          <span class="img-title">Path Tracer + Next Event Estimation</span>
+          <span class="img-desc">Same Cornell box with NEE applied. A direct-lighting sample is drawn explicitly toward the quad light at every path vertex. Noise is dramatically reduced compared to the naive estimator at the same SPP budget.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/cornellRR.png" alt="Cornell RR Scene"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · NEE + RR · D=∞</span>
+          <span class="img-title">NEE + Russian Roulette (D = ∞)</span>
+          <span class="img-desc">Cornell box rendered with both NEE and Russian Roulette enabled, allowing infinite path depth. RR terminates low-throughput paths stochastically, keeping the estimator unbiased while reclaiming compute budget for high-contribution paths.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/dragonRR.png" alt="Dragon Scene"/>
+        <div class="img-info">
+          <span class="img-tag">Dragon · NEE + RR · D=∞</span>
+          <span class="img-title">Stanford Dragon — Full Path Tracer</span>
+          <span class="img-desc">High-polygon Stanford dragon rendered with the complete path tracer (NEE + Russian Roulette, D = ∞). Global illumination produces soft color bleeding and realistic ambient occlusion in crevices across the detailed mesh surface.</span>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /panel-a3 -->
 
 </main>
 
