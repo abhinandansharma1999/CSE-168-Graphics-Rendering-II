@@ -709,6 +709,38 @@
       </div>
     </div>
 
+    <div class="section-title">Extra Credits</div>
+    <div class="tech-grid" style="margin-bottom:3.5rem;">
+      <div class="tech-block">
+        <h3>Cosine Importance Sampling</h3>
+        <p>
+          Implemented cosine importance sampling for the indirect bounce direction.
+          Rather than drawing directions uniformly from the hemisphere (pdf = 1/2π),
+          samples are drawn proportional to cos θ (pdf = cos θ/π), concentrating
+          paths near the surface normal where the Lambertian response is strongest.
+          The cos θ factor in the rendering equation cancels with the pdf, simplifying
+          the per-bounce weight to <code>π · brdf</code> — lower variance than uniform
+          sampling for diffuse surfaces at no extra cost per sample.
+        </p>
+        <!-- <p style="margin-top:0.75rem;">
+          Enabled via the <code>importancesampling cosine</code> scene command.
+          Reused <code>cornellRR.test</code> and created <code>cornellCosineExtraCreds.test</code>
+          with that single line added. Also rendered the <code>cornellCosine</code> test
+          from Homework 4a.
+        </p>
+        <ul style="margin-top:0.75rem;">
+          <li><a href="https://raviucsdgroup.s3.amazonaws.com/homework3b/9c0f3bfcb9cd716feb577735d6965146/20260506025336/index.html" style="color:var(--accent);font-size:0.8rem;">cornellCosineExtraCreds render ↗</a></li>
+          <li><a href="https://raviucsdgroup.s3.amazonaws.com/homework4a/9c0f3bfcb9cd716feb577735d6965146/20260506024220/index.html" style="color:var(--accent);font-size:0.8rem;">cornellCosine (HW4a) render ↗</a></li>
+        </ul> -->
+      </div>
+      <div class="tech-block">
+        <h3>New Scene Command</h3>
+        <ul>
+          <li>importancesampling cosine</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="section-title">Rendered Images</div>
     <div class="gallery">
 
@@ -745,6 +777,15 @@
           <span class="img-tag">Dragon · NEE + RR · D=∞</span>
           <span class="img-title">Stanford Dragon — Full Path Tracer</span>
           <span class="img-desc">High-polygon Stanford dragon rendered with the complete path tracer (NEE + Russian Roulette, D = ∞). Global illumination produces soft color bleeding and realistic ambient occlusion in crevices across the detailed mesh surface.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/cornellCosineExtraCreds.png" alt="Cornell Cosine Importance Sampling"/>
+        <div class="img-info">
+          <span class="img-tag">Extra Credit · Cosine IS</span>
+          <span class="img-title">Cornell Box — Cosine Importance Sampling</span>
+          <span class="img-desc">Same Cornell box (NEE + RR, D = ∞, 64 spp) rendered with cosine importance sampling for indirect bounces. Directions are sampled proportional to cos θ, cancelling the cosine factor in the estimator and reducing variance for diffuse surfaces compared to uniform hemisphere sampling.</span>
         </div>
       </div>
 
