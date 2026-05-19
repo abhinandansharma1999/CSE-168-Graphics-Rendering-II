@@ -335,7 +335,8 @@
   <div class="tab-bar">
     <button class="tab-btn" onclick="switchTab('a1')" id="btn-a1">Assignment 1</button>
     <button class="tab-btn" onclick="switchTab('a2')" id="btn-a2">Assignment 2</button>
-    <button class="tab-btn active" onclick="switchTab('a3')" id="btn-a3">Assignment 3</button>
+    <button class="tab-btn" onclick="switchTab('a3')" id="btn-a3">Assignment 3</button>
+    <button class="tab-btn active" onclick="switchTab('a4')" id="btn-a4">Assignment 4</button>
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -640,7 +641,7 @@
 
 
   <!-- ASSIGNMENT 3 -->
-  <div class="tab-panel active" id="panel-a3">
+  <div class="tab-panel" id="panel-a3">
     <div class="hero">
       <div class="tag">CSE 168 · UCSD · 2026</div>
       <h1>Assignment 3<br>Path Tracing</h1>
@@ -791,6 +792,142 @@
 
     </div>
   </div><!-- /panel-a3 -->
+
+
+  <!-- ══════════════════════════════════════════
+       ASSIGNMENT 4
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-a4">
+
+    <div class="hero">
+      <div class="tag">CSE 168 · UCSD · 2026</div>
+      <h1>Assignment 4<br>Multiple Importance Sampling</h1>
+      <p>
+        Extends the path tracer with GGX microfacet BRDFs, BRDF importance sampling
+        for both Phong and GGX, and Multiple Importance Sampling (MIS) combining
+        NEE area sampling and BRDF sampling via the power heuristic — dramatically
+        reducing variance on glossy surfaces illuminated by area lights.
+      </p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Student</span><span class="meta-value">Abhinandan Sharma</span></div>
+        <div class="meta-item"><span class="meta-label">GPU</span><span class="meta-value">NVIDIA GTX 1650</span></div>
+        <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">Implementation Highlights</div>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-title">Cosine Importance Sampling</div>
+        <div class="feat-desc">Indirect bounce directions are drawn proportional to cosθ (pdf = cosθ/π) instead of uniformly from the hemisphere (pdf = 1/2π). The cosine factor in the rendering equation cancels with the pdf, simplifying the per-bounce weight to <code>π · brdf</code> and reducing variance on diffuse surfaces at no extra cost per sample.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">GGX Microfacet BRDF</div>
+        <div class="feat-desc">Physically-based specular model using the GGX normal distribution <code>D</code>, Smith masking-shadowing <code>G = G1(wi)·G1(wo)</code> (Schlick approximation), and Schlick Fresnel <code>F</code>. Evaluated as <code>kd/π + F·G·D / (4·cosθᵢ·cosθₒ)</code>. Roughness <code>alpha</code> is set per-geometry.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">BRDF Importance Sampling</div>
+        <div class="feat-desc">A mixture sampler splits samples between specular and diffuse lobes proportional to <code>t = ksAvg / (kdAvg + ksAvg)</code>. Phong specular samples around the mirror direction using a power-cosine distribution; GGX samples a microfacet normal <code>h</code> from the GGX distribution then reflects to get <code>wi</code>. Both use cosine-weighted hemisphere sampling for the diffuse lobe.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Multiple Importance Sampling (MIS)</div>
+        <div class="feat-desc">Direct lighting combines one BRDF sample and one NEE area sample per quad light, weighted by the power heuristic <code>w = p_a² / (p_a² + p_b²)</code>. Each strategy's contribution is scaled by its MIS weight, eliminating the high-variance spikes that appear when either strategy is used alone on glossy surfaces.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Power Heuristic Weighting</div>
+        <div class="feat-desc">The power heuristic (β = 2) is used rather than the balance heuristic, as it more aggressively suppresses large-variance samples from the weaker strategy. BRDF and NEE pdfs are evaluated analytically for each other's samples without resampling.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Quad Light Analytical Occlusion</div>
+        <div class="feat-desc">Quad lights have no OptiX geometry, so shadow rays pass through them without triggering <code>anyHit</code>. An additional analytical intersection check tests every shadow ray against all other quad lights, ensuring inter-light shadowing is correctly accounted for.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Unified BRDF / Sampling Pipeline</div>
+        <div class="feat-desc">Both <code>brdfType</code> (Phong or GGX) and <code>importanceSampling</code> mode (hemisphere, cosine, brdf) are stored per-geometry and forwarded through the payload. The same closest-hit shader handles all combinations via branching, with no separate integrators needed.</div>
+      </div>
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-block">
+        <h3>New Scene Commands</h3>
+        <ul>
+          <li>brdf phong|ggx</li>
+          <li>roughness &lt;alpha&gt;</li>
+          <li>importancesampling cosine|brdf</li>
+          <li>gamma &lt;value&gt;</li>
+        </ul>
+      </div>
+      <div class="tech-block">
+        <h3>Implementation Notes</h3>
+        <p>
+          The GGX specular mixture probability is floored at 0.25 so that
+          at least 25% of samples always probe the specular lobe, preventing
+          degenerate pdfs on near-diffuse surfaces. The NEE pdf is converted
+          from area measure to solid angle as <code>R²/(A·cosθₒ)</code> for each
+          quad light and averaged across all lights for the MIS weight computation.
+        </p>
+      </div>
+    </div>
+
+    <div class="section-title">Rendered Images</div>
+    <div class="gallery">
+
+      <div class="img-card">
+        <img src="images/cornellBRDF.png" alt="Cornell BRDF Importance Sampling"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · BRDF IS · NEE</span>
+          <span class="img-title">BRDF Importance Sampling</span>
+          <span class="img-desc">Cornell box with a highly specular GGX sphere rendered using BRDF importance sampling + NEE. Bounce directions are drawn from the GGX specular/diffuse mixture, concentrating samples in the high-contribution specular lobe and producing a clean specular highlight with low noise.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/cornellCosine.png" alt="Cornell Cosine Importance Sampling"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · Cosine IS · NEE</span>
+          <span class="img-title">Cosine Importance Sampling</span>
+          <span class="img-desc">Same Cornell box rendered with cosine-weighted hemisphere sampling for indirect bounces. Directions proportional to cosθ cancel the cosine factor in the estimator, reducing variance on diffuse surfaces compared to uniform hemisphere sampling.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/cornellMIS.png" alt="Cornell MIS"/>
+        <div class="img-info">
+          <span class="img-tag">Cornell · MIS</span>
+          <span class="img-title">Multiple Importance Sampling</span>
+          <span class="img-desc">Cornell box with MIS enabled. BRDF samples and NEE area samples are combined via the power heuristic at each path vertex. The result is noticeably cleaner than either strategy alone — MIS suppresses the firefly spikes from BRDF sampling while retaining the low-noise diffuse illumination from NEE.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/dragon_MIS.png" alt="Dragon GGX"/>
+        <div class="img-info">
+          <span class="img-tag">Dragon · GGX · MIS</span>
+          <span class="img-title">Stanford Dragon — GGX + MIS</span>
+          <span class="img-desc">Stanford dragon rendered with the GGX microfacet BRDF and MIS. The combination of a physically-based specular model and optimal sample weighting produces realistic glossy highlights across the curved mesh surface with minimal noise.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/ggx.png" alt="GGX Spheres"/>
+        <div class="img-info">
+          <span class="img-tag">GGX · Material Comparison</span>
+          <span class="img-title">GGX Roughness Sweep</span>
+          <span class="img-desc">Six GGX spheres with varying roughness values, from near-mirror (left) to fully diffuse (right). Demonstrates the full range of the GGX microfacet model — tight specular highlights at low roughness gradually broadening into a rough matte appearance.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/mis.png" alt="MIS Test Scene"/>
+        <div class="img-info">
+          <span class="img-tag">MIS · Multi-Light Scene</span>
+          <span class="img-title">MIS — Multiple Area Lights</span>
+          <span class="img-desc">Scene with multiple quad lights of varying sizes and intensities — the canonical test for MIS. Small bright lights are best sampled by BRDF sampling; large dim lights by NEE. MIS combines both strategies optimally, producing correct inter-light shadows and clean specular reflections across all light configurations simultaneously.</span>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /panel-a4 -->
 
 </main>
 
