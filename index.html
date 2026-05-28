@@ -336,7 +336,8 @@
     <button class="tab-btn" onclick="switchTab('a1')" id="btn-a1">Assignment 1</button>
     <button class="tab-btn" onclick="switchTab('a2')" id="btn-a2">Assignment 2</button>
     <button class="tab-btn" onclick="switchTab('a3')" id="btn-a3">Assignment 3</button>
-    <button class="tab-btn active" onclick="switchTab('a4')" id="btn-a4">Assignment 4</button>
+    <button class="tab-btn" onclick="switchTab('a4')" id="btn-a4">Assignment 4</button>
+    <button class="tab-btn active" onclick="switchTab('final')" id="btn-final">Final Project</button>
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -797,7 +798,7 @@
   <!-- ══════════════════════════════════════════
        ASSIGNMENT 4
   ══════════════════════════════════════════ -->
-  <div class="tab-panel active" id="panel-a4">
+  <div class="tab-panel" id="panel-a4">
 
     <div class="hero">
       <div class="tag">CSE 168 · UCSD · 2026</div>
@@ -928,6 +929,160 @@
 
     </div>
   </div><!-- /panel-a4 -->
+
+
+  <!-- ══════════════════════════════════════════
+       FINAL PROJECT
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-final">
+
+    <div class="hero">
+      <div class="tag">CSE 168 · UCSD · 2026 · Final Project</div>
+      <h1>Subsurface Scattering<br>with Environment Map Lighting</h1>
+      <p>
+        Extends the path tracer with volumetric light transport inside participating
+        media, HDR image-based lighting with importance sampling, texture mapping,
+        and ACES tone mapping — targeting a photorealistic wax or jade bunny hero image
+        under real-world HDR illumination.
+      </p>
+      <div class="meta-row">
+        <div class="meta-item"><span class="meta-label">Student</span><span class="meta-value">Abhinandan Sharma</span></div>
+        <div class="meta-item"><span class="meta-label">GPU</span><span class="meta-value">NVIDIA GTX 1650</span></div>
+        <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span></div>
+        <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value">In Progress — Milestone</span></div>
+      </div>
+    </div>
+
+    <!-- CURRENT STATE -->
+    <div class="section-title">Current State — Milestone Render</div>
+
+    <div class="img-card" style="margin-bottom:3rem;">
+      <img src="images/stanford_bunny.png" alt="Stanford Bunny — Current State"/>
+      <div class="img-info" style="flex-direction:column; align-items:flex-start; gap:0.5rem;">
+        <div style="display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap;">
+          <span class="img-tag">Milestone · Path Tracer · Assignment 4 Baseline</span>
+          <span class="img-title">Stanford Bunny — GGX + MIS + Russian Roulette</span>
+        </div>
+        <span class="img-desc">
+          The Stanford bunny OBJ was obtained from the Stanford 3D Scanning Repository
+          (<code>bun_zipper.ply</code> converted to OBJ). A custom <code>.test</code> scene file was
+          authored to place the bunny on a flat ground plane, configure a quad area light above
+          and to the left, and enable the full path tracer pipeline from assignment 4.
+        </span>
+        <span class="img-desc" style="margin-top:0.3rem;">
+          The render uses the <strong>GGX microfacet BRDF</strong> with roughness 0.3, giving the
+          slightly matte-specular appearance visible on the body. <strong>Multiple importance
+          sampling</strong> combines NEE area samples toward the quad light with BRDF samples
+          via the power heuristic, producing the clean, low-noise result at 128 spp.
+          <strong>Russian roulette</strong> with infinite depth allows light to bounce freely
+          between the bunny and the ground plane — visible as the soft contact shadow and
+          the gentle colour bleed underneath the body. The ground plane uses a flat diffuse
+          material, making it an ideal baseline to compare against once texture mapping is
+          added. The black background confirms no environment map is active yet — this will
+          be replaced by HDR image-based lighting in the next phase.
+        </span>
+      </div>
+    </div>
+
+    <!-- PROPOSAL -->
+    <div class="section-title">Project Proposal</div>
+
+    <div style="background:var(--white); border:1px solid var(--border); padding:1.5rem; margin-bottom:2rem;">
+      <p style="font-size:0.88rem; color:var(--muted); line-height:1.7;">
+        Building on the existing OptiX path tracer with full indirect illumination and
+        multiple importance sampling, this project extends the renderer with subsurface
+        scattering for translucent materials, HDR environment map lighting, and texture
+        mapping. The hero image will be the Stanford bunny rendered as a wax or jade
+        material under realistic HDR illumination, with light visibly scattering beneath
+        the surface and glowing through thin geometry like the ears, placed on a textured
+        ground plane.
+      </p>
+    </div>
+
+    <div class="features" style="margin-bottom:2rem;">
+      <div class="feat">
+        <div class="feat-title">Obj. 1 — Specular Transmission &amp; Medium Tracking</div>
+        <div class="feat-desc">
+          Add support for rays transmitting through surfaces using Snell's law and
+          Schlick's Fresnel approximation. Maintain a small priority stack on the ray
+          payload to track which medium the ray is currently inside as it enters and exits
+          surfaces. Correctly handles nested media and is the prerequisite for all SSS work.
+          Enables glass and transparent materials as a standalone result.
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Obj. 2 — Volumetric Light Transport</div>
+        <div class="feat-desc">
+          Inside a participating medium, attenuate ray throughput by Beer-Lambert
+          transmittance <code>exp(−σₜ · t)</code> stored as float3 for coloured media.
+          Before each surface hit, probabilistically check for a scatter event by sampling
+          a distance from an exponential distribution parameterised by <code>σₛ</code>.
+          At scatter points, draw a new direction from the Henyey-Greenstein phase function
+          with anisotropy parameter <code>g</code>. Together these produce the characteristic
+          soft glow of wax, jade, and skin.
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Obj. 3 — HDR Environment Map + Importance Sampling</div>
+        <div class="feat-desc">
+          Load HDR environment maps in <code>.hdr</code> format and use them as the primary
+          light source. Build a 2D luminance-weighted CDF at startup and sample directions
+          proportional to luminance. Plug into the existing MIS framework alongside BRDF
+          sampling using the balance heuristic — directly reusing the MIS infrastructure
+          from assignment 4. Replaces the black background and synthetic lights with
+          natural image-based illumination.
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Obj. 4 — Texture Mapping &amp; Tone Mapping</div>
+        <div class="feat-desc">
+          Support UV-mapped diffuse textures and normal maps on triangle geometry using
+          OptiX's built-in texture sampler. Apply to the ground plane to replace the current
+          flat grey material. Additionally implement ACES filmic tone mapping as a
+          post-process before gamma correction in <code>Renderer.cpp</code>, ensuring HDR
+          lighting renders without blown highlights or crushed shadows.
+        </div>
+      </div>
+    </div>
+
+    <!-- VALIDATION -->
+    <div class="section-title">Validation Plan</div>
+    <div class="tech-grid" style="margin-bottom:2rem;">
+      <div class="tech-block">
+        <h3>Analytic Checks</h3>
+        <ul>
+          <li>Fresnel at normal incidence matches <code>((n1−n2)/(n1+n2))²</code></li>
+          <li>Beer-Lambert slab matches <code>exp(−σₜ · t)</code> analytically</li>
+          <li>Uniform white envmap equals hemispherical area light of same intensity</li>
+          <li>Near-zero scattering albedo converges to existing opaque surface render</li>
+        </ul>
+      </div>
+      <div class="tech-block">
+        <h3>Planned Comparison Images</h3>
+        <ul>
+          <li>Glass bunny — validates Obj. 1 (transmission only)</li>
+          <li>SSS bunny under point light — isolates Obj. 2</li>
+          <li>SSS bunny with/without env map IS at equal spp — demonstrates Obj. 3</li>
+          <li>Wax vs jade side by side — material parameter flexibility</li>
+          <li>Tone mapped vs raw HDR output — demonstrates Obj. 4</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- REFERENCES -->
+    <!-- <div class="section-title">References</div>
+    <div class="tech-block" style="margin-bottom:3rem;">
+      <ul>
+        <li>SIGGRAPH 2017 Course on Production Volume Rendering — Pixar (primary implementation reference)</li>
+        <li>Simple Nested Dielectrics in Ray Traced Images — Tompkin et al.</li>
+        <li>Henyey &amp; Greenstein 1941 — phase function</li>
+        <li>TA notes by Andrew Bauer on SSS and volume rendering</li>
+        <li>HDRIHaven — environment maps</li>
+        <li>Stanford 3D Scanning Repository — bunny and dragon models</li>
+      </ul>
+    </div> -->
+
+  </div><!-- /panel-final -->
 
 </main>
 
