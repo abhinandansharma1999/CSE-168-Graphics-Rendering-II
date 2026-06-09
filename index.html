@@ -259,6 +259,15 @@
       line-height: 1.6;
     }
 
+    .tech-block a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .tech-block a:hover {
+      text-decoration: underline;
+    }
+
     /* ── GALLERY ── */
     .gallery {
       display: flex;
@@ -940,147 +949,298 @@
       <div class="tag">CSE 168 · UCSD · 2026 · Final Project</div>
       <h1>Subsurface Scattering<br>with Environment Map Lighting</h1>
       <p>
-        Extends the path tracer with volumetric light transport inside participating
-        media, HDR image-based lighting with importance sampling, texture mapping,
-        and ACES tone mapping — targeting a photorealistic wax or jade bunny hero image
-        under real-world HDR illumination.
+        Extended the OptiX path tracer with specular transmission, volumetric subsurface
+        scattering, HDR image-based lighting, texture mapping, and ACES tone mapping.
+        The hero image is the Stanford bunny as warm wax on a marble floor under a studio
+        HDR environment with soft quad-light fills.
       </p>
       <div class="meta-row">
         <div class="meta-item"><span class="meta-label">Student</span><span class="meta-value">Abhinandan Sharma</span></div>
         <div class="meta-item"><span class="meta-label">GPU</span><span class="meta-value">NVIDIA GTX 1650</span></div>
         <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">OptiX 6.5 · CUDA 10.1 · C++</span></div>
-        <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value">In Progress — Milestone</span></div>
+        <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value">Complete</span></div>
       </div>
     </div>
 
-    <!-- CURRENT STATE -->
-    <div class="section-title">Current State — Milestone Render</div>
+    <!-- HERO DELIVERABLE -->
+    <div class="section-title">Hero Image</div>
 
     <div class="img-card" style="margin-bottom:3rem;">
-      <img src="images/stanford_bunny.png" alt="Stanford Bunny — Current State"/>
+      <img src="images/stanford_bunny_hero_final.png" alt="Stanford Bunny — Hero Render"/>
       <div class="img-info" style="flex-direction:column; align-items:flex-start; gap:0.5rem;">
         <div style="display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap;">
-          <span class="img-tag">Milestone · Path Tracer · Assignment 4 Baseline</span>
-          <span class="img-title">Stanford Bunny — GGX + MIS + Russian Roulette</span>
+          <span class="img-tag">Hero · All Objectives</span>
+          <span class="img-title">Warm Wax Bunny — Marble Floor · Studio HDR</span>
         </div>
         <span class="img-desc">
-          The Stanford bunny OBJ was obtained from the Stanford 3D Scanning Repository
-          (<code>bun_zipper.ply</code> converted to OBJ). A custom <code>.test</code> scene file was
-          authored to place the bunny on a flat ground plane, configure a quad area light above
-          and to the left, and enable the full path tracer pipeline from assignment 4.
-        </span>
-        <span class="img-desc" style="margin-top:0.3rem;">
-          The render uses the <strong>GGX microfacet BRDF</strong> with roughness 0.3, giving the
-          slightly matte-specular appearance visible on the body. <strong>Multiple importance
-          sampling</strong> combines NEE area samples toward the quad light with BRDF samples
-          via the power heuristic, producing the clean, low-noise result at 128 spp.
-          <strong>Russian roulette</strong> with infinite depth allows light to bounce freely
-          between the bunny and the ground plane — visible as the soft contact shadow and
-          the gentle colour bleed underneath the body. The ground plane uses a flat diffuse
-          material, making it an ideal baseline to compare against once texture mapping is
-          added. The black background confirms no environment map is active yet — this will
-          be replaced by HDR image-based lighting in the next phase.
+          Final deliverable combining all four objectives: the bunny is a transmissive
+          subsurface-scattering wax material (light glows through the ears and thin body),
+          lit by a rotated studio HDR map plus warm quad area lights, sitting on a
+          UV-mapped marble floor. Output is tone-mapped with ACES filmic curve and exposure
+          control at 2048 samples per pixel.
         </span>
       </div>
     </div>
 
-    <!-- PROPOSAL -->
-    <div class="section-title">Project Proposal</div>
+    <!-- SUMMARY -->
+    <div class="section-title">Project Summary</div>
 
-    <div style="background:var(--white); border:1px solid var(--border); padding:1.5rem; margin-bottom:2rem;">
+    <div style="background:var(--white); border:1px solid var(--border); padding:1.5rem; margin-bottom:2.5rem;">
+      <p style="font-size:0.88rem; color:var(--muted); line-height:1.7; margin-bottom:1rem;">
+        Starting from the assignment 4 path tracer (GGX + MIS + Russian roulette), I added
+        four major features without replacing any existing functionality. Each objective
+        was developed and validated with its own test scene before combining them in the
+        hero image.
+      </p>
       <p style="font-size:0.88rem; color:var(--muted); line-height:1.7;">
-        Building on the existing OptiX path tracer with full indirect illumination and
-        multiple importance sampling, this project extends the renderer with subsurface
-        scattering for translucent materials, HDR environment map lighting, and texture
-        mapping. The hero image will be the Stanford bunny rendered as a wax or jade
-        material under realistic HDR illumination, with light visibly scattering beneath
-        the surface and glowing through thin geometry like the ears, placed on a textured
-        ground plane.
+        New scene commands include <code>transmissive</code>, <code>subsurface</code>,
+        <code>ior</code>, <code>sigmat</code>, <code>sigmas</code>, <code>anisotropy</code>,
+        <code>envmap</code>, <code>envintensity</code>, <code>envrotation</code>,
+        <code>envpitch</code>, <code>envscaleu/v</code>, <code>texdiffuse</code>,
+        <code>texnormal</code>, <code>texrepeat</code>, <code>tonemap aces</code>, and
+        <code>exposure</code>.
       </p>
     </div>
 
-    <div class="features" style="margin-bottom:2rem;">
+    <!-- ASSET CREDITS -->
+    <div class="section-title">Asset Credits</div>
+
+    <div class="tech-grid" style="margin-bottom:3rem;">
+      <div class="tech-block">
+        <h3>Source</h3>
+        <p>
+          All HDR environment maps and floor textures were downloaded from
+          <a href="https://polyhaven.com/">Poly Haven</a> — a free, CC0 public-domain
+          asset library. HDRIs from
+          <a href="https://polyhaven.com/hdris">polyhaven.com/hdris</a>;
+          textures from
+          <a href="https://polyhaven.com/textures">polyhaven.com/textures</a>.
+        </p>
+      </div>
+      <div class="tech-block">
+        <h3>Assets Used in Renders</h3>
+        <ul>
+          <li><a href="https://polyhaven.com/a/studio_small_09">Studio Small 09</a> — hero &amp; studio HDR</li>
+          <li><a href="https://polyhaven.com/a/qwantani">Qwantani</a> — outdoor sky HDR</li>
+          <li><a href="https://polyhaven.com/a/brown_photostudio_02">Brown Photostudio 02</a> — warm studio tests</li>
+          <li><a href="https://polyhaven.com/a/marble_01">Marble 01</a> — floor diffuse + normal (1k PNG)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- BASELINE -->
+    <div class="section-title">Starting Point</div>
+
+    <div class="img-card" style="margin-bottom:3rem;">
+      <img src="images/stanford_bunny.png" alt="Stanford Bunny — Baseline"/>
+      <div class="img-info">
+        <span class="img-tag">Baseline · A4</span>
+        <span class="img-title">Stanford Bunny — GGX + MIS (Pre-Project)</span>
+        <span class="img-desc">Opaque GGX bunny on a flat grey floor with a single quad area light and black background. This was the milestone render before any final-project features were added.</span>
+      </div>
+    </div>
+
+    <!-- OBJECTIVE 1 -->
+    <div class="section-title">Objective 1 — Specular Transmission &amp; Medium Tracking</div>
+
+    <div class="features" style="margin-bottom:1.5rem;">
       <div class="feat">
-        <div class="feat-title">Obj. 1 — Specular Transmission &amp; Medium Tracking</div>
-        <div class="feat-desc">
-          Add support for rays transmitting through surfaces using Snell's law and
-          Schlick's Fresnel approximation. Maintain a small priority stack on the ray
-          payload to track which medium the ray is currently inside as it enters and exits
-          surfaces. Correctly handles nested media and is the prerequisite for all SSS work.
-          Enables glass and transparent materials as a standalone result.
-        </div>
+        <div class="feat-title">What Was Added</div>
+        <div class="feat-desc">Rays can refract through surfaces using Snell's law with Schlick Fresnel to choose reflection vs transmission. Each ray tracks its current medium IOR on the payload (<code>currentIOR</code>), updated when entering or exiting transmissive geometry — sufficient for the single-shell bunny, with glass shadow rays passing through dielectric surfaces.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Obj. 2 — Volumetric Light Transport</div>
-        <div class="feat-desc">
-          Inside a participating medium, attenuate ray throughput by Beer-Lambert
-          transmittance <code>exp(−σₜ · t)</code> stored as float3 for coloured media.
-          Before each surface hit, probabilistically check for a scatter event by sampling
-          a distance from an exponential distribution parameterised by <code>σₛ</code>.
-          At scatter points, draw a new direction from the Henyey-Greenstein phase function
-          with anisotropy parameter <code>g</code>. Together these produce the characteristic
-          soft glow of wax, jade, and skin.
-        </div>
+        <div class="feat-title">How It Works</div>
+        <div class="feat-desc">Glass materials use a dedicated transmissive path: on hit, Fresnel decides reflect or refract, the ray origin is offset to avoid self-intersection, and shadow rays pass through glass without blocking light. This is the foundation for wax — rays must enter the volume before scattering can happen inside.</div>
+      </div>
+    </div>
+
+    <div class="img-card" style="margin-bottom:3rem;">
+      <img src="images/stanford_bunny_glass_final.png" alt="Glass Bunny"/>
+      <div class="img-info">
+        <span class="img-tag">Obj. 1 · Glass</span>
+        <span class="img-title">Stanford Bunny — Clear Glass</span>
+        <span class="img-desc">Transmission-only validation render. The bunny refracts background and floor through its surface with Fresnel highlights on curved regions. No volumetric scattering — pure specular transmission.</span>
+      </div>
+    </div>
+
+    <!-- OBJECTIVE 2 -->
+    <div class="section-title">Objective 2 — Volumetric Light Transport (SSS)</div>
+
+    <div class="features" style="margin-bottom:1.5rem;">
+      <div class="feat">
+        <div class="feat-title">What Was Added</div>
+        <div class="feat-desc">Inside a participating medium, throughput is attenuated by Beer-Lambert absorption. Before each surface intersection, a scatter distance is sampled from an exponential distribution. At scatter events, outgoing directions follow the Henyey-Greenstein phase function.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Obj. 3 — HDR Environment Map + Importance Sampling</div>
-        <div class="feat-desc">
-          Load HDR environment maps in <code>.hdr</code> format and use them as the primary
-          light source. Build a 2D luminance-weighted CDF at startup and sample directions
-          proportional to luminance. Plug into the existing MIS framework alongside BRDF
-          sampling using the balance heuristic — directly reusing the MIS infrastructure
-          from assignment 4. Replaces the black background and synthetic lights with
-          natural image-based illumination.
-        </div>
+        <div class="feat-title">Wax Material</div>
+        <div class="feat-desc">The wax path refracts rays into the bunny interior, runs multi-scatter volume transport in the ray generation loop, and on exit applies direct lighting plus approximate wrap and back-transmission terms for shell glow. Material parameters (<code>sigmat</code>, <code>sigmas</code>, <code>anisotropy</code>, diffuse colour) control milkiness, warmth, and ear translucency.</div>
+      </div>
+    </div>
+
+    <div class="img-card" style="margin-bottom:3rem;">
+      <img src="images/stanford_bunny_sss_final.png" alt="SSS Bunny"/>
+      <div class="img-info">
+        <span class="img-tag">Obj. 2 · SSS</span>
+        <span class="img-title">Stanford Bunny — Subsurface Scattering (Quad Lights)</span>
+        <span class="img-desc">Wax bunny under area lights only, no HDR background. Shows volumetric glow in thin regions (ears, edges) and soft diffuse falloff on the body. Isolates objective 2 from environment lighting.</span>
+      </div>
+    </div>
+
+    <!-- OBJECTIVE 3 -->
+    <div class="section-title">Objective 3 — HDR Environment Map + Importance Sampling</div>
+
+    <div class="features" style="margin-bottom:1.5rem;">
+      <div class="feat">
+        <div class="feat-title">What Was Added</div>
+        <div class="feat-desc">HDR <code>.hdr</code> files are loaded at startup and a 2D luminance-weighted CDF is built for importance sampling bright regions of the map. Miss rays return environment radiance; at each shading point, environment NEE samples are combined with BRDF samples via the same power-heuristic MIS used in assignment 4. Uniform sphere sampling is available via <code>envuniform on</code> for variance comparisons.</div>
       </div>
       <div class="feat">
-        <div class="feat-title">Obj. 4 — Texture Mapping &amp; Tone Mapping</div>
-        <div class="feat-desc">
-          Support UV-mapped diffuse textures and normal maps on triangle geometry using
-          OptiX's built-in texture sampler. Apply to the ground plane to replace the current
-          flat grey material. Additionally implement ACES filmic tone mapping as a
-          post-process before gamma correction in <code>Renderer.cpp</code>, ensuring HDR
-          lighting renders without blown highlights or crushed shadows.
+        <div class="feat-title">Scene Control</div>
+        <div class="feat-desc">Environment rotation, pitch, intensity, and UV scale let me frame the backdrop — hiding room corners and placing a softbox highlight upper-right in the hero scene. Quad lights supplement the HDR for warm wax colour where the map alone would look too cool or dim.</div>
+      </div>
+    </div>
+
+    <div class="gallery" style="margin-bottom:3rem;">
+
+      <div class="img-card">
+        <img src="images/stanford_bunny_env_sky_final.png" alt="SSS Bunny — Sky HDR"/>
+        <div class="img-info">
+          <span class="img-tag">Obj. 3 · Sky HDR</span>
+          <span class="img-title">SSS Bunny — Outdoor Sky Environment</span>
+          <span class="img-desc">Subsurface bunny lit primarily by an outdoor HDR sky map. Demonstrates environment-as-background and image-based illumination on a translucent material.</span>
+        </div>
+      </div>
+
+      <div class="img-card">
+        <img src="images/stanford_bunny_env_studio_final.png" alt="SSS Bunny — Studio HDR"/>
+        <div class="img-info">
+          <span class="img-tag">Obj. 3 · Studio HDR</span>
+          <span class="img-title">SSS Bunny — Studio HDR Environment</span>
+          <span class="img-desc">Same SSS material under an indoor studio HDR with visible softbox in the backdrop. Shows how luminance-weighted sampling and env rotation frame the lighting for a product-shot look.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OBJECTIVE 4 -->
+    <div class="section-title">Objective 4 — Texture Mapping &amp; Tone Mapping</div>
+
+    <div class="features" style="margin-bottom:1.5rem;">
+      <div class="feat">
+        <div class="feat-title">What Was Added</div>
+        <div class="feat-desc">Triangles support UV coordinates with diffuse and normal map textures loaded through OptiX texture samplers. Albedo textures are decoded from sRGB to linear before shading. Normal maps perturb the shading normal with a blend toward the geometric normal to keep highlights stable under HDR lighting.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-title">Tone Mapping</div>
+        <div class="feat-desc">ACES filmic tone mapping, a linear exposure multiplier, and gamma 2.2 encoding are applied in <code>Renderer.cpp</code> when saving the image, compressing HDR path-tracer output into displayable range without crushing shadows or blowing out the wax glow. The hero scene uses this pipeline together with the marble floor texture.</div>
+      </div>
+    </div>
+
+    <div class="img-card" style="margin-bottom:3rem;">
+      <img src="images/stanford_bunny_hero_final.png" alt="Hero — Textured Floor + ACES"/>
+      <div class="img-info">
+        <span class="img-tag">Obj. 4 · Textures + ACES</span>
+        <span class="img-title">Hero Scene — Marble Floor + ACES Tone Map</span>
+        <span class="img-desc">Final composite: UV-mapped marble tiles on the floor (diffuse + normal maps), ACES tone mapping with tuned exposure, combined with objectives 1–3. This is the same hero image shown at the top of the page.</span>
+      </div>
+    </div>
+
+    <!-- COMPARISON STUDIES -->
+    <div class="section-title">Proposal Comparison Studies</div>
+
+    <p style="font-size:0.85rem; color:var(--muted); line-height:1.7; margin-bottom:2rem;">
+      Each pair below uses identical camera, resolution, and sample count — only the varied
+      parameter differs, as specified in the project proposal.
+    </p>
+
+    <div class="section-title" style="margin-top:0; font-size:0.65rem; color:var(--muted); border-bottom-color:var(--border);">Wax vs Jade Material</div>
+    <div class="gallery" style="margin-bottom:2.5rem;">
+      <div class="img-card">
+        <img src="images/stanford_bunny_wax_compare.png" alt="Wax material"/>
+        <div class="img-info">
+          <span class="img-tag">Wax · 1024 spp</span>
+          <span class="img-title">Warm Wax — IOR 1.35, g = 0.55</span>
+          <span class="img-desc">Golden diffuse albedo with higher forward scattering. Ears glow warm orange where light passes through thin geometry.</span>
+        </div>
+      </div>
+      <div class="img-card">
+        <img src="images/stanford_bunny_jade_compare.png" alt="Jade material"/>
+        <div class="img-info">
+          <span class="img-tag">Jade · 1024 spp</span>
+          <span class="img-title">Carved Nephrite — IOR 1.61, g = 0.32</span>
+          <span class="img-desc">Deep emerald albedo, polished greasy specular (roughness 0.05), and milkier volume scatter. Warm key light against cool green fill brings out internal glow in the ears.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0; font-size:0.65rem; color:var(--muted); border-bottom-color:var(--border);">Environment Importance Sampling — 512 spp</div>
+    <div class="gallery" style="margin-bottom:2.5rem;">
+      <div class="img-card">
+        <img src="images/stanford_bunny_env_sss_is.png" alt="Env luminance-weighted IS"/>
+        <div class="img-info">
+          <span class="img-tag">Luminance IS · envuniform off</span>
+          <span class="img-title">Studio HDR + Luminance-Weighted Sampling</span>
+          <span class="img-desc">Bright softbox regions are sampled proportionally to luminance. Lower noise in highlights and cleaner backdrop at equal 512 spp.</span>
+        </div>
+      </div>
+      <div class="img-card">
+        <img src="images/stanford_bunny_env_sss_uniform.png" alt="Env uniform sampling"/>
+        <div class="img-info">
+          <span class="img-tag">Uniform · envuniform on</span>
+          <span class="img-title">Studio HDR + Uniform Sphere Sampling</span>
+          <span class="img-desc">Same scene and 512 spp with uniform direction sampling. Higher variance in bright regions demonstrates the benefit of luminance-weighted IS.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0; font-size:0.65rem; color:var(--muted); border-bottom-color:var(--border);">ACES Tone Map vs Raw HDR — 2048 spp</div>
+    <div class="gallery" style="margin-bottom:3rem;">
+      <div class="img-card">
+        <img src="images/stanford_bunny_hero_tonemap_aces.png" alt="ACES tone mapped"/>
+        <div class="img-info">
+          <span class="img-tag">ACES · exposure 1.26</span>
+          <span class="img-title">Hero Scene — ACES Filmic + Gamma 2.2</span>
+          <span class="img-desc">Filmic rolloff preserves wax glow in the ears and softbox highlights without clipping. Shadows retain detail on the marble floor.</span>
+        </div>
+      </div>
+      <div class="img-card">
+        <img src="images/stanford_bunny_hero_tonemap_raw.png" alt="Raw HDR Reinhard"/>
+        <div class="img-info">
+          <span class="img-tag">Raw · tonemap off</span>
+          <span class="img-title">Hero Scene — Reinhard + sRGB (No ACES)</span>
+          <span class="img-desc">Same path-traced HDR radiance with Reinhard compression instead of ACES. Highlights wash out and overall contrast is flatter at equal sample count.</span>
         </div>
       </div>
     </div>
 
     <!-- VALIDATION -->
-    <div class="section-title">Validation Plan</div>
-    <div class="tech-grid" style="margin-bottom:2rem;">
+    <div class="section-title">Validation</div>
+    <div class="tech-grid" style="margin-bottom:3rem;">
       <div class="tech-block">
         <h3>Analytic Checks</h3>
         <ul>
-          <li>Fresnel at normal incidence matches <code>((n1−n2)/(n1+n2))²</code></li>
-          <li>Beer-Lambert slab matches <code>exp(−σₜ · t)</code> analytically</li>
-          <li>Uniform white envmap equals hemispherical area light of same intensity</li>
-          <li>Near-zero scattering albedo converges to existing opaque surface render</li>
+          <li>Fresnel at normal incidence uses <code>((n1−n2)/(n1+n2))²</code></li>
+          <li>Beer-Lambert transmittance along interior segments</li>
+          <li>Glass render confirms refraction without volume scatter</li>
+          <li>Opaque settings converge to standard GGX + MIS result</li>
+          <li>Env MIS uses power heuristic (β = 2), same as assignment 4</li>
         </ul>
       </div>
       <div class="tech-block">
-        <h3>Planned Comparison Images</h3>
+        <h3>All Deliverables</h3>
         <ul>
-          <li>Glass bunny — validates Obj. 1 (transmission only)</li>
-          <li>SSS bunny under point light — isolates Obj. 2</li>
-          <li>SSS bunny with/without env map IS at equal spp — demonstrates Obj. 3</li>
-          <li>Wax vs jade side by side — material parameter flexibility</li>
-          <li>Tone mapped vs raw HDR output — demonstrates Obj. 4</li>
+          <li>Baseline bunny — <code>stanford_bunny.test</code></li>
+          <li>Glass bunny — <code>stanford_bunny_glass.test</code></li>
+          <li>SSS bunny (quad lights) — <code>stanford_bunny_sss.test</code></li>
+          <li>SSS + outdoor HDR — <code>stanford_bunny_env_sss.test</code></li>
+          <li>SSS + studio HDR — <code>stanford_bunny_env_sss_is.test</code></li>
+          <li>Wax vs jade comparison — 1024 spp pair</li>
+          <li>Env IS vs uniform — 512 spp pair</li>
+          <li>ACES vs raw tonemap — 2048 spp pair</li>
+          <li>Hero (wax + marble floor + ACES) — <code>stanford_bunny_hero.test</code></li>
         </ul>
       </div>
     </div>
-
-    <!-- REFERENCES -->
-    <!-- <div class="section-title">References</div>
-    <div class="tech-block" style="margin-bottom:3rem;">
-      <ul>
-        <li>SIGGRAPH 2017 Course on Production Volume Rendering — Pixar (primary implementation reference)</li>
-        <li>Simple Nested Dielectrics in Ray Traced Images — Tompkin et al.</li>
-        <li>Henyey &amp; Greenstein 1941 — phase function</li>
-        <li>TA notes by Andrew Bauer on SSS and volume rendering</li>
-        <li>HDRIHaven — environment maps</li>
-        <li>Stanford 3D Scanning Repository — bunny and dragon models</li>
-      </ul>
-    </div> -->
 
   </div><!-- /panel-final -->
 
